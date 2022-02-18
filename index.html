@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<meta name="description" content="VMINE - World's First Mining Metaverse">
+  <meta name="keywords" content="vmine,matic,nft,meta,metaverse,vmine.app,vmine.org,virtual,mining">
+
+	<title>VMINE - Application</title>
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Viga&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
+	<link rel="stylesheet" href="./css/leaflet-search.src.css">
+	<link rel="stylesheet" href="./css/styles2.css">
+	<link rel="stylesheet" href="./css/L.Grid.css">
+</head>
+
+<body ng-app="myApp" ng-controller="myCtrl">
+	<header>
+		<ul id="walletOpts" class="dropdown-content">
+			<li ng-show="account == null"><a href="javascript:void(0)" ng-click="connectWeb3()">MetaMask</a></li>
+			<li ng-show="account == null"><a href="javascript:void(0)" ng-click="connectWeb3()">Dapp Browser</a></li>
+			<li ng-show="account == null"><a href="javascript:void(0)" ng-click="connectWC()">WalletConnect</a></li>
+			
+			<li ng-show="account != null"><a href="javascript:void(0)" class="grey-text text-darken-2">Balance: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{account.balance.formatted}}</a></li>
+			<li ng-show="account != null" class="divider"></li>
+			<li ng-show="account != null"><a href="https://polygonscan.com/address/{{account.address.full}}" target="_blank"><i class="material-icons">format_list_numbered</i> View Transactions</a></li>
+			<li ng-show="account != null" class="divider"></li>
+			<li ng-show="account != null"><a href="javascript:void(0)" class="red-text" ng-click="disconnectWallet()"><i class="material-icons">block</i> Disconnect Wallet</a></li>
+		</ul>
+
+		<nav ng-class="currentTab == 'map' ? 'white' : 'blue darken-4'">
+			<div class="nav-wrapper">
+				<a href="javascript:void(0)" ng-class="currentTab == 'map' ? 'blue-text text-darken-4' : ''" class="brand-logo">VMINE</a>
+				<ul class="right">
+					<!-- <li ng-show="account != null" class="blue darken-3"><a href="javascript:void(0)">{{account.balance.formatted}}</a></li> -->
+					<li><a id="walletOptsTrigger" class="dropdown-trigger blue-text text-darken-4 yellow" data-target="walletOpts" href="javascript:void(0)">{{account == null ? 'Wallet' : account.address.short}}<i class="material-icons right">arrow_drop_down</i></a></li>
+				</ul>
+			</div>
+		</nav>
+	</header>
+	
+	<main class="blue-grey lighten-5">
+		<div ng-show="pointsLoading && currentTab == 'map'" class="progress blue darken-1 mapProgress">
+			<div class="indeterminate blue darken-4"></div>
+		</div>
+
+		<div id="map"></div>
+
+		<div id="featured">
+			<div ng-repeat="f in featured">
+				<h4>{{f.name}}</h4>
+				<div class="br-nav pointer">
+					<i ng-click="scrollLeft($index)" class="material-icons">chevron_left</i>
+					<!-- <button ng-click="scrollLeft($index)" class="btn-small btn-floating"><i class="material-icons">chevron_left</i></button> -->
+				</div>
+				
+				<div class="br-cards-container nos">
+					<div class="bigrow" ng-style="{'width': (300 * featured[$index].locations.length) + 'px'}">
+						<div ng-repeat="l in f.locations" class="br-card">
+							<div class="card white">
+								<div class="card-content">
+									<span class="card-title blue-text text-darken-4"><i class="material-icons">location_on</i> {{l.display}}</span>
+									<p class="rating">
+										<i class="material-icons orange-text text-lighten-2">star</i>
+										<i class="material-icons" ng-class="l.rating >= 2 ? 'orange-text text-lighten-2' : 'grey-text'">star</i>
+										<i class="material-icons" ng-class="l.rating == 3 ? 'orange-text text-lighten-2' : 'grey-text'">star</i>
+									</p>
+
+									<div class="kv">
+										<div>
+											<div>Miner Support</div>
+											<div>{{l.rating == 3 ? 'All Miners' : 'Upto level ' + l.rating}}</div>
+										</div>
+										<div>
+											<div>Daily </div>
+											<div>Upto {{dbRewards[5 + l.rating].daily}} {{dbRewards[5 + l.rating].currency}}</div>
+										</div>
+										<div>
+											<div>Reward</div>
+											<div>Upto {{dbRewards[2 + l.rating].daily}} {{dbRewards[2 + l.rating].currency}}</div>
+										</div>
+										<div>
+											<div></div>
+											<div>Upto {{dbRewards[-1 + l.rating].daily}} {{dbRewards[-1 + l.rating].currency}}</div>
+										</div>
+									</div>
+								</div>
+								<div class="card-action of">
+									<a ng-click="openMap(l.points)" class="right blue-text text-darken-4" href="javascript:void(0)"><i class="material-icons">gps_fixed</i> Explore</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="br-nav">
+					<i ng-click="scrollRight($index)" class="material-icons">chevron_right</i>
+					<!-- <button ng-click="scrollRight($index)" class="btn-small btn-floating"><i class="material-icons">chevron_right</i></button> -->
+				</div>
+			</div>
+		</div>
+		
+		<div id="dashboard">
+			<div class="row">
+				<div class="col s6 m3 card-holder" ng-click="dsChange(DS.LANDS)">
+					<div ng-class="ds == DS.LANDS ? 'grey lighten-2' : ''" class="card">
+						<div class="card-content text-right">
+							<h5 class="grey-text text-darken-1">LANDS</h5>
+							<h4 class="blue-text text-darken-4">{{dbLands.length}}</h4>
+						</div>
+					</div>
+				</div>
+
+				<div class="col s6 m3 card-holder" ng-click="dsChange(DS.BUY)">
+					<div ng-class="ds == DS.BUY ? 'grey lighten-2' : ''" class="card">
+						<div class="card-content text-right">
+							<h5 class="grey-text text-darken-1">BUY</h5>
+							<h4 class="blue-text text-darken-4"><i class="material-icons">new_releases</i> {{offersMade.length}}</h4>
+						</div>
+					</div>
+				</div>
+
+				<div class="col s6 m3 card-holder" ng-click="dsChange(DS.SELL)">
+					<div ng-class="ds == DS.SELL ? 'grey lighten-2' : ''" class="card">
+						<div class="card-content text-right">
+							<h5 class="grey-text text-darken-1">SELL</h5>
+							<h4 class="blue-text text-darken-4"><i class="material-icons">new_releases</i> {{offersRcvd.length}}</h4>
+						</div>
+					</div>
+				</div>
+
+				<div class="col s6 m3 card-holder" ng-click="dsChange(DS.REWARDS)">
+					<div ng-class="ds == DS.REWARDS ? 'grey lighten-2' : ''" class="card">
+						<div class="card-content text-right">
+							<h5 class="grey-text text-darken-1">REWARDS</h5>
+							<h4 class="blue-text text-darken-4 mult-logos">
+								<img src="./images/out/etc.png" />
+								<img src="./images/out/ltc.png" />
+								<img src="./images/out/btc.png" />
+							</h4>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="table-holder" ng-show="ds == DS.LANDS && dbLands.length > 0">
+				<table class="white centered striped z-depth-1">
+					<thead>
+						<tr>
+							<th>Location</th>
+							<th>Miner</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="land in dbLands">
+							<td>{{landDetails[land.id].display}}</td>
+							<td ng-show="land.status == 1"><button class="btn black btn-small btn-floating tooltipped" data-position="top" data-tooltip="Install Miner" ng-click="openLocationModal2(land.id, true, land.status)"><i class="material-icons">build</i></button></td>
+							<td ng-show="land.status > 1"><img class="table-fan tooltipped miner-in-table" data-position="top" data-tooltip="Miner Running" ng-src="{{dbRewards[land.status - 2].icon}}" /></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="table-holder" ng-show="ds == DS.BUY && offersMade.length > 0">
+				<table class="white centered striped z-depth-1">
+					<thead>
+						<tr>
+							<th>Location</th>
+							<th>Offer</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="offer in offersMade">
+							<td>{{landDetails[offer.tokenId].display}}</td>
+							<td>{{offer.amtFormatted}}</td>
+							<td><button class="btn red btn-small btn-floating tooltipped" data-position="top" data-tooltip="Cancel" ng-click="cancelOffer(offer.id)"><i class="material-icons">close</i></button></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="table-holder" ng-show="ds == DS.SELL && offersRcvd.length > 0">
+				<table class="white centered striped z-depth-1">
+					<thead>
+						<tr>
+							<th>Location</th>
+							<th>Offer</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="offer in offersRcvd">
+							<td>{{landDetails[offer.tokenId].display}}</td>
+							<td>{{offer.amtFormatted}}</td>
+							<td><button class="btn blue darken-3 btn-small btn-floating tooltipped" data-position="top" data-tooltip="Sell" ng-click="acceptOffer(offer.id)"><i class="material-icons">check</i></button></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="table-holder" ng-show="ds == DS.REWARDS">
+				<table class="white centered striped z-depth-1">
+					<thead>
+						<tr>
+							<th>Miner</th>
+							<th>Claimed</th>
+							<th>Pending</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="reward in dbRewards">
+							<td><img class="miner-in-table" height="30" src="{{reward.icon}}" /></td>
+							<td>{{reward.claimed}}</td>
+							<td><button ng-class="reward.pending == 0 ? 'disabled' : ''" class="btn blue darken-3 btn-small tooltipped" data-position="top" data-tooltip="Claim Reward" ng-click="claimReward(reward.eType)"><i class="material-icons">account_balance_wallet</i> {{reward.pending}} {{reward.currency}}</button></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<div id="guide">
+			<div>
+				<h4>Tutorials</h4>
+				<p class="light">Learn how to make most of the Vmine Metaverse.</p>
+
+				<ul class="collapsible">
+					<li ng-repeat="t in tuts">
+						<div class="collapsible-header"><i ng-show="t.icon" class="material-icons">{{t.icon}}</i>{{t.title}}</div>
+						<div class="collapsible-body oh">
+							<div class="left">
+								<iframe ng-src="{{t.link}}" allow="fullscreen;"></iframe>
+							</div>
+							<div class="left light">
+								{{t.desc}}
+							</div>
+						</div>
+					</li>
+				</ul>
+			</div>
+
+			<section>&nbsp;</section>
+			<div>
+				<h4>Tokens Cheatsheet</h4>
+				<p class="light">These are the tree tokens for which you can install miners.</p>
+
+				<table class="white centered striped z-depth-1">
+					<thead>
+						<tr>
+							<th>Token</th>
+							<th>Total Supply</th>
+							<th>Daily Reward</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="t in tokens">
+							<td>{{t.name}}</td>
+							<td>{{t.supply}}</td>
+							<td>{{t.daily}} {{t.name}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<section>&nbsp;</section>
+			<div>
+				<h4>Miners Cheatsheet</h4>
+				<p class="light">By installing mining equipment on your LAND, you can earn a daily mining reward. There are three generations of miners. Higher generation yields higher rewards. You can choose the mining equipment of the token you want to mine.</p>
+
+				<table class="white centered striped z-depth-1">
+					<thead>
+						<tr>
+							<th>Model</th>
+							<th>Daily Reward</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="e in dbRewards">
+							<td><img class="miner-in-table" height="30" ng-src="{{e.icon}}">&nbsp;&nbsp;{{e.eName}}</td>
+							<td>{{e.daily}} {{e.currency}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<section>&nbsp;</section>
+			<div>
+				<h4>LAND Cheatsheet</h4>
+				<p class="light">You need LAND to install the mining equipment. There are 600K LAND units distributed across the game map. The compatibility of mining equipment depends on the LAND rating. Check LAND rating before buying.</p>
+
+				<table class="white centered striped z-depth-1">
+					<thead>
+						<tr>
+							<th>Country</th>
+							<th>Miner Support</th>
+							<th>Rating</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="c in countries">
+							<td>{{c.name}}</td>
+							<td ng-show="c.rating == 1"><span class="badge yellow black-text">Gen 1</span></td>
+							<td ng-show="c.rating == 2"><span class="badge orange black-text">Up to Gen 2</span></td>
+							<td ng-show="c.rating == 3"><span class="badge green lighten-1 white-text">All Gens</span></td>
+							<td>
+								<i class="material-icons" ng-class="c.rating == 3 ? 'orange-text text-lighten-2' : 'grey-text'">star</i>
+								<i class="material-icons" ng-class="c.rating >= 2 ? 'orange-text text-lighten-2' : 'grey-text'">star</i>
+								<i class="material-icons orange-text text-lighten-2">star</i>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>			
+		</div>
+	</main>
+	
+	<footer>
+		<ul class="tabs tabs-fixed-width" ng-class="currentTab == 'map' ? 'white' : 'blue darken-4'">
+			<li class="tab" ng-class="account == null ? 'disabled' : ''"><a ng-click="currentTab = 'dashboard'" href="#dashboard" class="nactive"><i class="material-icons">dashboard</i><span>Dashboard</span></a></li>
+			<li class="tab"><a ng-click="currentTab = 'map'" href="#map" class="active"><i class="material-icons">map</i><span>Map</span></a></li>
+			<li class="tab"><a ng-click="currentTab = 'featured'" href="#featured" class="nactive"><i class="material-icons">stars</i><span>Featured</span></a></li>
+			<li class="tab"><a ng-click="currentTab = 'guide'" href="#guide" class="nactive"><i class="material-icons">info</i><span>Guide</span></a></li>
+		</ul>
+	</footer>
+
+	<div id="makeOfferModal" class="modal bottom-sheet">
+		<div ng-show="loading" class="progress blue darken-4">
+      <div class="indeterminate blue darken-1"></div>
+  	</div>
+
+		<div class="modal-content">
+			<h5>Purchase Offer</h5>
+
+			<section>&nbsp;</section>
+			
+			<div>
+				<div class="input-field">
+					<input id="makeOfferPrice" ng-model="sl.makeOfferPrice" type="number" step="0.1" />
+          <label for="makeOfferPrice">Offer Price</label>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal-footer">
+			<a href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="modal-close btn-flat">Cancel</a>
+			<a ng-click="makeOffer2()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Confirm</a>
+		</div>
+	</div>
+
+	<div id="minerModal" class="modal bottom-sheet">
+		<div ng-show="loading" class="progress blue darken-4">
+      <div class="indeterminate blue darken-1"></div>
+  	</div>
+
+		<div class="modal-content">
+			<h5>Miner Installation</h5>
+
+			<section>&nbsp;</section>
+			
+			<div>
+				<div class="input-field">
+					<select ng-model="sl.newStatus" class="icons">
+						<option ng-value="1" disabled>Select an option</option>
+						<option ng-repeat="opt in dbRewards" ng-disabled="opt.eType == sl.status || !(sl.id > opt.min && sl.id <= opt.max)" ng-value="{{opt.eType}}" data-icon="{{opt.eType != sl.status && sl.id > opt.min && sl.id <= opt.max ? opt.icon : ''}}">{{opt.eName}} {{opt.eType == sl.status ? ' (Already Installed)' : ''}} {{(sl.id > opt.min && sl.id <= opt.max) ? '' : ' (Not Supported)'}}</option>
+					</select>
+					<label>Choose Miner Model</label>
+				</div>
+			</div>
+
+			<div ng-show="sl.newStatus > 1" class="kv">
+				<div>
+					<div>Installation</div>
+					<div>{{dbRewards[sl.newStatus - 2].price}} MATIC</div>
+				</div>
+				<div>
+					<div>Daily Mining Reward</div>
+					<div>{{dbRewards[sl.newStatus - 2].daily}} {{dbRewards[sl.newStatus - 2].currency}}</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal-footer">
+			<a href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="modal-close btn-flat">Cancel</a>
+			<a ng-click="installMiner2()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Install</a>
+		</div>
+	</div>
+
+	<div id="minerMulModal" class="modal bottom-sheet">
+		<div ng-show="loading" class="progress blue darken-4">
+      <div class="indeterminate blue darken-1"></div>
+  	</div>
+
+		<div class="modal-content">
+			<h5>Miner Installation</h5>
+
+			<section>&nbsp;</section>
+			
+			<div>
+				<div class="input-field">
+					<select ng-model="sl.newStatus" ng-change="onTILCheckChange(id)" class="icons">
+						<option ng-value="1" disabled>Select an option</option>
+						<option ng-repeat="opt in dbRewards" ng-disabled="!(sl.id > opt.min && sl.id <= opt.max)" ng-value="{{opt.eType}}" data-icon="{{sl.id > opt.min && sl.id <= opt.max ? opt.icon : ''}}">{{opt.eName}} {{(sl.id > opt.min && sl.id <= opt.max) ? '' : ' (Not Supported)'}}</option>
+					</select>
+					<label>Choose Miner Model</label>
+				</div>
+			</div>
+
+			<div ng-show="sl.newStatus > 1" class="kv">
+				<div>
+					<div>Installation</div>
+					<div>{{sl.totalInstallPrice}} MATIC</div>
+				</div>
+				<div>
+					<div>Daily Mining Reward</div>
+					<div>{{sl.totalInstallReward}} {{dbRewards[sl.newStatus - 2].currency}}</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal-footer">
+			<a href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="modal-close btn-flat">Cancel</a>
+			<a ng-click="installMulMiner2()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Install</a>
+		</div>
+	</div>
+
+	<div id="selectModal" class="modal bottom-sheet">
+		<div ng-show="loading" class="progress blue darken-4">
+      <div class="indeterminate blue darken-1"></div>
+  	</div>
+
+		<div class="modal-content">
+			<h5>Land Details</h5>
+			<p ng-show="!sl.noRadio">
+				<label>
+					<input ng-model="sl.multiMode" ng-value="0" type="radio" name="actionSelect" />
+					<span>Buy Land</span>
+				</label>
+				<label>
+					<input ng-model="sl.multiMode" ng-value="1" type="radio" name="actionSelect" />
+					<span>Install Miner</span>
+				</label>
+			</p>
+			<div class="kv">
+				<div ng-repeat="id in sl.toBuyList" ng-show="sl.multiMode == 0">
+					<div>{{landDetails[id].display}}</div>
+					<div>
+						<p class="m-0">
+							<label>
+								<input class="filled-in" type="checkbox" ng-model="sl.checkList[id]" ng-change="onTBLCheckChange(id)" />
+								<span></span>
+							</label>
+						</p>
+					</div>
+				</div>
+
+				<div ng-repeat="id in sl.toInstallList" ng-show="sl.multiMode == 1">
+					<div>{{landDetails[id].display}}</div>
+					<div>
+						<p class="m-0">
+							<label>
+								<input class="filled-in" type="checkbox" ng-model="sl.checkList[id]" />
+								<span></span>
+							</label>
+						</p>
+					</div>
+				</div>
+
+				<div ng-show="sl.multiMode == 0">
+					<div>Daily mBTC Reward</div>
+					<div>Upto {{sl.toBuyList.length * dbRewards[5 + sl.rating].daily}} mBTC</div>
+				</div>
+				<div ng-show="sl.multiMode == 0">
+					<div>Daily mLTC Reward</div>
+					<div>Upto {{sl.toBuyList.length * dbRewards[2 + sl.rating].daily}} mLTC</div>
+				</div>
+				<div ng-show="sl.multiMode == 0">
+					<div>Daily mETC Reward</div>
+					<div>Upto {{sl.toBuyList.length * dbRewards[-1 + sl.rating].daily}} mETC</div>
+				</div>
+				<div ng-show="sl.multiMode == 0">
+					<div>Price per LAND</div>
+					<div>{{LAND_BASE_PRICES[sl.rating - 1]}} MATIC</div>
+				</div>
+				<div ng-show="sl.multiMode == 0">
+					<div>Total Price</div>
+					<div>{{sl.totalBuyPrice}} MATIC</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal-footer">
+			<a href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="modal-close btn-flat">Cancel</a>
+			<a ng-show="sl.multiMode == 0" ng-click="mintMulLand()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Buy Land</a>
+			<a ng-show="sl.multiMode == 1" ng-click="installMulMiner()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Install Miner</a>
+		</div>
+	</div>
+
+	<div id="locationModal" class="modal bottom-sheet">
+		<div ng-show="loading" class="progress blue darken-4">
+      <div class="indeterminate blue darken-1"></div>
+  	</div>
+
+		<div class="modal-content">
+			<h5>Land Details</h5>
+			<p class="light"><i class="material-icons">location_on</i> {{sl.address}}</p>
+			<p class="slStatus">
+				<img ng-class="sl.status > 1 ? 'miner-in-table' : ''" ng-src="{{sl.icon}}" />
+				<span>{{sl.textStatus}}</span>
+			</p>
+			<div class="kv">
+				<!-- <div>
+					<div>Current Owner</div>
+					<div>{{sl.owner}}</div>
+				</div> -->
+				<div>
+					<div>Land Rating</div>
+					<div>
+						<i class="material-icons orange-text text-lighten-2">star</i>
+						<i class="material-icons" ng-class="sl.rating >= 2 ? 'orange-text text-lighten-2' : 'grey-text'">star</i>
+						<i class="material-icons" ng-class="sl.rating == 3 ? 'orange-text text-lighten-2' : 'grey-text'">star</i>
+					</div>
+				</div>
+				<div>
+					<div>Daily mBTC Reward</div>
+					<div>Upto {{dbRewards[5 + sl.rating].daily}}</div>
+				</div>
+				<div>
+					<div>Daily mLTC Reward</div>
+					<div>Upto {{dbRewards[2 + sl.rating].daily}}</div>
+				</div>
+				<div>
+					<div>Daily mETC Reward</div>
+					<div>Upto {{dbRewards[-1 + sl.rating].daily}}</div>
+				</div>
+				<div ng-show="sl.status == 0">
+					<div>Price</div>
+					<div>{{LAND_BASE_PRICES[sl.rating - 1]}} MATIC</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal-footer">
+			<a href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="modal-close btn-flat">Cancel</a>
+			<a ng-show="!sl.myLand && sl.status == 0" ng-click="mintLand()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Buy Land</a>
+			<a ng-show="!sl.myLand && sl.status != 0" ng-click="makeOffer()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Make Offer</a>
+			<a ng-show="sl.myLand" ng-click="installMiner()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">{{sl.status > 1 ? 'Update Miner' : 'Install Miner'}}</a>
+		</div>
+	</div>
+	
+
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.0-rc.0/web3.min.js" integrity="sha512-/PTXSvaFzmO4So7Ghyq+DEZOz0sNLU4v1DP4gMOfY3kFu9L/IKoqSHZ6lNl3ZoZ7wT20io3vu/U4IchGcGIhfw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+	<script src="./js/leaflet-search.src.js"></script>
+	<script src="./js/bundle.js"></script>
+	<script src="./js/view.js"></script>
+	<script src="./js/chain.js"></script>
+	<script src="./js/app.js"></script>
+	<script src="./js/map.js"></script>
+	<script src="./js/L.Grid.js"></script>
+</body>
+
+</html>
