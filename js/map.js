@@ -11,7 +11,7 @@ const startZoom = getLastZoom();
 // console.log(startPoint);
 
 const map = L.map('map', { zoomControl: false }).setView([startPoint.lat, startPoint.lng], startZoom);
-L.tileLayer(`https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGV2YW5zaHVsaW51eCIsImEiOiJjanVkdjZlOXQwMzBjNDNxeGd4cGRoeDk4In0.5Pkcb5bTg75NdpO4pG71DQ`, {
+L.tileLayer(`https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGV2YW5zaHVsaW51eCIsImEiOiJja3h1MWcybngwcWRyMm5waDlyemoyMHkzIn0.raNjTos02K9cmbKdWLuceA`, {
 	attribution: `© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>`,
 	id: 'devanshulinux/ckxviyram382z14muuytohhkp',
 	minZoom: 4,
