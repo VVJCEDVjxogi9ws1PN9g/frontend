@@ -3,7 +3,7 @@ const BASE_URL = 'https://vmine.app';
 
 const app = angular.module('myApp', []);
 // app.controller('myCtrl', function($scope, $window, $timeout, $interval, $sce) {
-app.controller('myCtrl', ['$scope', '$window', '$timeout', '$interval', '$sce', async function($scope, $window, $timeout, $interval, $sce) {
+app.controller('myCtrl', ['$scope', '$window', '$timeout', '$interval', '$sce', function($scope, $window, $timeout, $interval, $sce) {
 	$scope.currentTab = getTab();
 	
 	$scope.account = null;
@@ -1911,7 +1911,7 @@ app.controller('myCtrl', ['$scope', '$window', '$timeout', '$interval', '$sce', 
 
 	_scope = $scope;
 
-	await loadWeb3($scope);
+	loadWeb3($scope);
 	loadContract();
 }]);
 

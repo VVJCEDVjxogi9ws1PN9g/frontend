@@ -6,10 +6,6 @@ window.usingInjected = false;
 async function loadWeb3($scope) {
 	window.web3 = new Web3(new Web3.providers.HttpProvider(RPC_URL));
 	if (window.ethereum) window.ethSupported = true;
-
-	const lct = getLastConnection();
-	if (lct == 1) $scope.connectWeb3();
-	else if (lct == 0) await $scope.connectWC();
 }
 
 function setLastConnection(type) {
@@ -60,6 +56,10 @@ function loadContract() {
 			address: etcData.address
 		}
 	};
+
+	const lct = getLastConnection();
+	if (lct == 1) $scope.connectWeb3();
+	else if (lct == 0) $scope.connectWC();
 }
 
 function toEth(wei) {
