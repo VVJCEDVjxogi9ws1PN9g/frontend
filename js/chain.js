@@ -3,13 +3,13 @@ const CHAIN_ID = 80001;
 
 window.usingInjected = false;
 
-function loadWeb3($scope) {
+async function loadWeb3($scope) {
 	window.web3 = new Web3(new Web3.providers.HttpProvider(RPC_URL));
 	if (window.ethereum) window.ethSupported = true;
 
 	const lct = getLastConnection();
 	if (lct == 1) $scope.connectWeb3();
-	else if (lct == 0) $scope.connectWC();
+	else if (lct == 0) await $scope.connectWC();
 }
 
 function setLastConnection(type) {
