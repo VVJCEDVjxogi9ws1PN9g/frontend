@@ -23,7 +23,7 @@ app.controller('myCtrl', ['$scope', '$window', '$timeout', '$interval', '$sce', 
 			setLastConnection(window.usingInjected ? 1 : 0);
 			loadBalance($scope, false);
 
-			$timeout(function() {
+			$timeout(async function() {
 				await getMyLands($scope);
 				getLocationNames($scope);
 				renderFans();
