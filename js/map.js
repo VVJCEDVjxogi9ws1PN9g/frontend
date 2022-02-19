@@ -1,7 +1,7 @@
 const MIN_ZOOM_FOR_POINTS = 12;
 
 let fanMarkers = [];
-const SERVER_URL = 'http://vmine.xyz/';
+const SERVER_URL = 'https://vmine.xyz/';
 
 
 const DEFAULT_POINT = {lat: 38.18638677411551, lng: -97.05322265625001};

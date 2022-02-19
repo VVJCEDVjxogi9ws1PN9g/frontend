@@ -412,7 +412,7 @@ function getLocationNames($scope) {
 			$scope.$apply();
 		}
 	}
-	xhttp.open('GET', `http://vmine.xyz/locations/${$scope.account.address.full}`, true);
+	xhttp.open('GET', `https://vmine.xyz/locations/${$scope.account.address.full}`, true);
 	xhttp.send();
 }
 
@@ -453,7 +453,7 @@ async function getOffers($scope) {
 	// console.log(`offersRcvd = ${JSON.stringify(newArr2, null, 2)}`);
 
 	if (forDetails.length > 0) {
-		postRequest(`http://vmine.xyz/select-locations/`, {ids: forDetails}, (err, res) => {
+		postRequest(`https://vmine.xyz/select-locations/`, {ids: forDetails}, (err, res) => {
 			if (!err) {
 				$scope.landDetails = {...JSON.parse(res), ...$scope.landDetails};
 				$scope.$apply();
@@ -553,7 +553,7 @@ function getRating(id) {
 
 
 function getSelectNames($scope, ids) {
-	postRequest(`http://vmine.xyz/select-locations/`, {ids}, (err, res) => {
+	postRequest(`https://vmine.xyz/select-locations/`, {ids}, (err, res) => {
 		if (!err) {
 			$scope.landDetails = {...JSON.parse(res), ...$scope.landDetails};
 			$scope.$apply();
