@@ -3,7 +3,7 @@ const CHAIN_ID = 80001;
 
 window.usingInjected = false;
 
-async function loadWeb3($scope) {
+async function loadWeb3() {
 	window.web3 = new Web3(new Web3.providers.HttpProvider(RPC_URL));
 	if (window.ethereum) window.ethSupported = true;
 }
@@ -18,7 +18,7 @@ function deleteLastConnection() {
 	localStorage.removeItem('LCT');
 }
 
-function loadContract() {
+function loadContract($scope) {
 	const web3 = window.web3;
 	
 	const mflJson = bundle.contracts.Land;

@@ -1911,8 +1911,8 @@ app.controller('myCtrl', ['$scope', '$window', '$timeout', '$interval', '$sce', 
 
 	_scope = $scope;
 
-	loadWeb3($scope);
-	loadContract();
+	loadWeb3();
+	loadContract($scope);
 }]);
 
 function plsConnectWallet() {
