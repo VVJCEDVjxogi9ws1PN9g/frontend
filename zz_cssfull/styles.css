@@ -1,0 +1,30 @@
+* {
+	font-family: 'Viga', sans-serif;
+}
+
+.brand-logo {
+	margin-left: 20px;
+}
+
+.sidenav {
+	top: 64px;
+}
+
+#map {
+	width: 100vw;
+	height: calc(100vh - 64px);
+}
+
+@media only screen and (max-width: 600px) {
+	#map {
+		height: calc(100vh - 56px);
+	}
+
+	.sidenav {
+		top: 0;
+	}
+
+	.brand-logo {
+		margin-left: 0;
+	}
+}
