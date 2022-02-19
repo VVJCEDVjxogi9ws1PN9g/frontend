@@ -23,14 +23,14 @@ app.controller('myCtrl', ['$scope', '$window', '$timeout', '$interval', '$sce', 
 			setLastConnection(window.usingInjected ? 1 : 0);
 			loadBalance($scope, false);
 
-			$timeout(() => {
+			$timeout(function() {
 				await getMyLands($scope);
 				getLocationNames($scope);
 				renderFans();
 				for (let i = 2; i <= 10; i++) await loadRewardsData($scope, ''+i);
 				await getOffers($scope);
 				
-				$timeout(() => {
+				$timeout(function() {
 					initRest();
 				});
 			}, 1000);
