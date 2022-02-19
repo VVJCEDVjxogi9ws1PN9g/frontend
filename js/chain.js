@@ -1,1 +1,567 @@
-const RPC_URL="https://speedy-nodes-nyc.moralis.io/c8f7991de321be9413884a31/polygon/mumbai",CHAIN_ID=80001;function loadWeb3(t){window.web3=new Web3(new Web3.providers.HttpProvider(RPC_URL)),window.ethereum&&(window.ethSupported=!0);const n=getLastConnection();1==n?t.connectWeb3():0==n&&t.connectWC()}function setLastConnection(t){localStorage.setItem("LCT",t)}function getLastConnection(){return localStorage.getItem("LCT")}function deleteLastConnection(){localStorage.removeItem("LCT")}function loadContract(){const t=window.web3,n=bundle.contracts.Land,e=n.networks[CHAIN_ID],a=new t.eth.Contract(n.abi,e.address),o=bundle.contracts.BTC,c=o.networks[CHAIN_ID],s=new t.eth.Contract(o.abi,c.address),r=bundle.contracts.LTC,d=r.networks[CHAIN_ID],i=new t.eth.Contract(r.abi,d.address),l=bundle.contracts.ETC,u=l.networks[CHAIN_ID],w=new t.eth.Contract(l.abi,u.address);window.contracts={land:{contract:a,address:e.address},btc:{contract:s,address:c.address},ltc:{contract:i,address:d.address},etc:{contract:w,address:u.address}}}function toEth(t){return"string"!=typeof t&&(t=t.toString()),window.web3.utils.fromWei(toFixed2(t))}function toWei(t){return"string"!=typeof t&&(t=t.toString()),window.web3.utils.toWei(t)}function toFixed2(t){var n;Math.abs(t)<1?(n=parseInt(t.toString().split("e-")[1]))&&(t*=Math.pow(10,n-1),t="0."+new Array(n).join("0")+t.toString().substring(2)):(n=parseInt(t.toString().split("+")[1]))>20&&(n-=20,t/=Math.pow(10,n),t+=new Array(n+1).join("0"));return t}function getShortAccount(t){return`${t.substr(0,4)}...${t.substr(t.length-4,4)}`}function formatBalance(t){return`${Number(toEth(t)).toFixed(3)} MATIC`}function loadBalance(t,n){null!=t.account?window.web3.eth.getBalance(t.account.address.full).then(e=>{e=parseInt(e),t.account.balance={wei:e,formatted:formatBalance(e)},t.$apply(),n||setLoadBalanceTimeout(t)}).catch(e=>{n||setLoadBalanceTimeout(t)}):n||setLoadBalanceTimeout(t)}function setLoadBalanceTimeout(t){setTimeout(()=>{loadBalance(t,!1)},2e4)}async function getMyLands(t){let n=await window.contracts.land.contract.methods.getMyLands(t.account.address.full).call();n=n.filter(t=>t>0),t.account.lands=n;let e=await window.contracts.land.contract.methods.getMyLandStatuses(t.account.address.full).call();e=e.filter(t=>t>0),t.dbLands=[];for(let a=0;a<n.length;a++)t.dbLands.push({id:n[a],status:e[a]});t.$apply()}window.usingInjected=!1;const REQUEST_POINT_GROUP_SPACE=2e3;async function getStatus2(t){const n={};for(i=0;i<t.length;i+=4){const e=t[i+2],a=Math.floor(e/REQUEST_POINT_GROUP_SPACE);n.hasOwnProperty(a)?n[a].push(t[i],t[i+1],t[i+2],t[i+3]):n[a]=[t[i],t[i+1],t[i+2],t[i+3]]}let e={};for(let t in n){const a=await getStatus4(n[t]);e={...e,...a}}return e}async function getStatus4(t){let n,e;for(i=0;i<t.length;i+=4){const a=t[i+2];0==i?(n=a,e=a):(a<n&&(n=a),a>e&&(e=a))}const a=await window.contracts.land.contract.methods.getStatus(n,e).call(),o={};for(let t=0;t<a.length;t++)o[n+t]=a[t];return o}const REQUEST_POINT_LIMIT=1e4;async function getStatus(t){let n,e;for(i=0;i<t.length;i+=4){const a=t[i+2];0==i?(n=a,e=a):(a<n&&(n=a),a>e&&(e=a))}const a=[],o=e;let c=e-n;for(;c>0;){let t=n,s=e;c>REQUEST_POINT_LIMIT&&(s=(t=(e=n+REQUEST_POINT_LIMIT-1)+1)+REQUEST_POINT_LIMIT-1)>o&&(s=o),(await window.contracts.land.contract.methods.getStatus(n,e).call()).forEach(t=>a.push(t)),c-=e-n+1,n=t,e=s}return a}function performTrx(t,n,e,a,o){if(t.account.balance.wei<a)return void toast("Insufficient Balance",!0);const c={to:n,from:t.account.address.full,value:window.web3.utils.toHex(a),data:e};let s;s=window.usingInjected?window.ethereum.request({method:"eth_sendTransaction",params:[c]}):window.connector.sendTransaction(c),t.toggleLoader(),s.then(n=>{setTimeout(()=>{checkTrx(t,n,o)},TRX_CHECK_DELAY)}).catch(n=>{toast(n.message,!0),t.toggleLoader(),t.$apply()})}const TRX_CHECK_DELAY=2e3;function checkTrx(t,n,e){window.web3.eth.getTransactionReceipt(n,(a,o)=>{if(a)return t.toggleLoader(),void toast(a,!0);null!=o?(t.toggleLoader(),o.status?(loadBalance(t,!0),t.onTrxResult(e)):toast("Transaction Failed",!0)):setTimeout(()=>{checkTrx(t,n,e)},TRX_CHECK_DELAY)})}const LAND_BASE_PRICES=["0.1","0.2","0.3"];async function mintLand(t){const n=(await window.contracts.land.contract.methods.mintLand(t.sl.id)).encodeABI();performTrx(t,window.contracts.land.address,n,window.web3.utils.toWei(LAND_BASE_PRICES[getRating(t.sl.id)-1]),"mintLand")}async function mintMultiple(t,n){const e=(await window.contracts.land.contract.methods.mintMultiple(n)).encodeABI(),a=n.length*LAND_BASE_PRICES[getRating(n[0])-1];performTrx(t,window.contracts.land.address,e,window.web3.utils.toWei(""+a),"mintMultiple")}const MINER_PRICES={2:"1.99",3:"2.99",4:"3.99",5:"4.99",6:"5.99",7:"6.99",8:"7.99",9:"8.99",10:"9.99"};async function installMiner(t,n){const e=(await window.contracts.land.contract.methods.updateStatus(t.sl.id,n)).encodeABI();performTrx(t,window.contracts.land.address,e,window.web3.utils.toWei(MINER_PRICES[n]),"installMiner")}async function updateMultiple(t,n,e){const a=(await window.contracts.land.contract.methods.updateMultiple(n,e)).encodeABI(),o=n.length*MINER_PRICES[e];performTrx(t,window.contracts.land.address,a,window.web3.utils.toWei(""+o),"updateMultiple")}function getLocationNames(t){const n=new XMLHttpRequest;n.onreadystatechange=(()=>{n.readyState==XMLHttpRequest.DONE&&200==n.status&&(t.landDetails={...JSON.parse(n.responseText),...t.landDetails},t.$apply())}),n.open("GET",`https://vmine.xyz/locations/${t.account.address.full}`,!0),n.send()}async function getOffers(t){const n=[],e=await window.contracts.land.contract.methods.getOffers(t.account.address.full,"0").call(),a=[];e.forEach(t=>{0!=t[0]&&(n.push(t[5]),a.push({id:t[0],tokenId:t[5],amt:t[6],amtFormatted:toEth(t[6])+" MATIC"}))}),t.offersMade=a;const o=await window.contracts.land.contract.methods.getOffers(t.account.address.full,"1").call(),c=[];o.forEach(t=>{0!=t[0]&&c.push({id:t[0],tokenId:t[5],amt:t[6],amtFormatted:toEth(t[6])+" MATIC"})}),t.offersRcvd=c,n.length>0&&postRequest("https://vmine.xyz/select-locations/",{ids:n},(n,e)=>{n||(t.landDetails={...JSON.parse(e),...t.landDetails},t.$apply())})}async function makeOffer(t,n,e){const a=(await window.contracts.land.contract.methods.makeOffer(n)).encodeABI();performTrx(t,window.contracts.land.address,a,toWei(e),"makeOffer")}async function cancelOffer(t,n){const e=(await window.contracts.land.contract.methods.cancelOffer(n)).encodeABI();performTrx(t,window.contracts.land.address,e,"0","cancelOffer")}async function acceptOffer(t,n){const e=(await window.contracts.land.contract.methods.acceptOffer(n)).encodeABI();performTrx(t,window.contracts.land.address,e,"0","acceptOffer")}async function loadRewardsData(t,n){let e="";n>=2&&n<=4?e="etc":n>=5&&n<=7?e="ltc":n>=8&&n<=10&&(e="btc");const a=await window.contracts[e].contract.methods.rewardData(t.account.address.full,n).call();t.dbRewards[n-2].claimed=toEth(a[0]),t.dbRewards[n-2].pending=toEth(a[1]),t.$apply()}async function claimReward(t,n){let e="";n>=2&&n<=4?e="etc":n>=5&&n<=7?e="ltc":n>=8&&n<=10&&(e="btc");const a=(await window.contracts[e].contract.methods.claimReward(n)).encodeABI();performTrx(t,window.contracts[e].address,a,0,"claimReward")}function postRequest(t,n,e){const a=new XMLHttpRequest;a.open("POST",t),a.setRequestHeader("Content-Type","application/json"),a.send(JSON.stringify(n)),a.onreadystatechange=(()=>{a.readyState==XMLHttpRequest.DONE&&200==a.status&&e(null,a.responseText)})}function getRequest(t,n){const e=new XMLHttpRequest;e.onreadystatechange=(()=>{e.readyState==XMLHttpRequest.DONE&&(200==e.status?n(null,JSON.parse(e.responseText)):n(`ERROR ${e.status}`,null))}),e.open("GET",t,!0),e.send()}const RATING_BREAKPOINTS=[207974,516027,1015195];function getRatingIndex(t){return t<=RATING_BREAKPOINTS[0]?0:t<=RATING_BREAKPOINTS[1]?1:2}function getRating(t){return t<=RATING_BREAKPOINTS[0]?3:t<=RATING_BREAKPOINTS[1]?2:1}function getSelectNames(t,n){postRequest("https://vmine.xyz/select-locations/",{ids:n},(n,e)=>{n||(t.landDetails={...JSON.parse(e),...t.landDetails},t.$apply())})}
+const RPC_URL = 'https://speedy-nodes-nyc.moralis.io/c8f7991de321be9413884a31/polygon/mumbai';
+const CHAIN_ID = 80001;
+
+window.usingInjected = false;
+
+function loadWeb3($scope) {
+	window.web3 = new Web3(new Web3.providers.HttpProvider(RPC_URL));
+	if (window.ethereum) window.ethSupported = true;
+
+	const lct = getLastConnection();
+	if (lct == 1) $scope.connectWeb3();
+	else if (lct == 0) $scope.connectWC();
+}
+
+function setLastConnection(type) {
+	localStorage.setItem('LCT', type);
+}
+function getLastConnection() {
+	return localStorage.getItem('LCT');
+}
+function deleteLastConnection() {
+	localStorage.removeItem('LCT');
+}
+
+function loadContract() {
+	const web3 = window.web3;
+	
+	const mflJson = bundle.contracts.Land;
+	const landData = mflJson.networks[CHAIN_ID];
+	const landContract = new web3.eth.Contract(mflJson.abi, landData.address);
+	// console.log(landData.address);
+
+	const btcJson = bundle.contracts.BTC;
+	const btcData = btcJson.networks[CHAIN_ID];
+	const btcContract = new web3.eth.Contract(btcJson.abi, btcData.address);
+
+	const ltcJson = bundle.contracts.LTC;
+	const ltcData = ltcJson.networks[CHAIN_ID];
+	const ltcContract = new web3.eth.Contract(ltcJson.abi, ltcData.address);
+
+	const etcJson = bundle.contracts.ETC;
+	const etcData = etcJson.networks[CHAIN_ID];
+	const etcContract = new web3.eth.Contract(etcJson.abi, etcData.address);
+
+	window.contracts = {
+		land: {
+			contract: landContract,
+			address: landData.address
+		},
+		btc: {
+			contract: btcContract,
+			address: btcData.address
+		},
+		ltc: {
+			contract: ltcContract,
+			address: ltcData.address
+		},
+		etc: {
+			contract: etcContract,
+			address: etcData.address
+		}
+	};
+}
+
+function toEth(wei) {
+	if (typeof wei !== 'string') wei = wei.toString();
+	return window.web3.utils.fromWei(toFixed2(wei));
+}
+function toWei(eth) {
+	if (typeof eth !== 'string') eth = eth.toString();
+	return window.web3.utils.toWei(eth);
+}
+
+function toFixed2(x) {
+	if (Math.abs(x) < 1.0) {
+		var e = parseInt(x.toString().split('e-')[1]);
+		if (e) {
+			x *= Math.pow(10, e - 1);
+			x = '0.' + (new Array(e)).join('0') + x.toString().substring(2);
+		}
+	} else {
+		var e = parseInt(x.toString().split('+')[1]);
+		if (e > 20) {
+			e -= 20;
+			x /= Math.pow(10, e);
+			x += (new Array(e + 1)).join('0');
+		}
+	}
+	return x;
+}
+
+function getShortAccount(account) {
+	return `${account.substr(0, 4)}...${account.substr(account.length - 4, 4)}`;
+}
+
+function formatBalance(balanceInWei) {
+	return `${Number(toEth(balanceInWei)).toFixed(3)} MATIC`;
+}
+
+function loadBalance($scope, oneTime) {
+	if ($scope.account != null) {
+		// Get Account Balance
+		window.web3.eth.getBalance($scope.account.address.full)
+			.then(balanceInWei => {
+				balanceInWei = parseInt(balanceInWei);
+				$scope.account.balance = {
+					wei: balanceInWei,
+					formatted: formatBalance(balanceInWei)
+				}
+
+				$scope.$apply();
+				// console.log($scope.account.balance.formatted);
+
+				if (!oneTime) setLoadBalanceTimeout($scope);
+			})
+			.catch(_err => {
+				if (!oneTime) setLoadBalanceTimeout($scope);
+			});
+	} else if (!oneTime) setLoadBalanceTimeout($scope);
+}
+
+function setLoadBalanceTimeout($scope) {
+	setTimeout(() => {
+		loadBalance($scope, false);
+	}, 20000);
+}
+
+async function getMyLands($scope) {
+	let data = await window.contracts.land.contract.methods.getMyLands($scope.account.address.full).call();
+	data = data.filter(id => id > 0);
+	$scope.account.lands = data;
+
+	let statusData = await window.contracts.land.contract.methods.getMyLandStatuses($scope.account.address.full).call();
+	statusData = statusData.filter(status => status > 0);
+	
+	$scope.dbLands = [];
+	for (let i = 0; i < data.length; i++) {
+		$scope.dbLands.push({
+			id: data[i],
+			status: statusData[i]
+		});
+	}
+
+	// console.log(`My Lands = ${data}`);
+	// console.log(`My Land Statuses = ${statusData}`);
+
+	$scope.$apply();
+}
+const REQUEST_POINT_GROUP_SPACE = 2000;
+async function getStatus2(loadedPoints) {
+	const groups = {};
+	for (i = 0; i < loadedPoints.length; i += 4) {
+		const id = loadedPoints[i + 2];
+		const groupId = Math.floor(id / REQUEST_POINT_GROUP_SPACE);
+
+		if (groups.hasOwnProperty(groupId)) {
+			groups[groupId].push(
+				loadedPoints[i],
+				loadedPoints[i + 1],
+				loadedPoints[i + 2],
+				loadedPoints[i + 3]
+			);
+		} else {
+			groups[groupId] = [
+				loadedPoints[i],
+				loadedPoints[i + 1],
+				loadedPoints[i + 2],
+				loadedPoints[i + 3]
+			];
+		}
+	}
+
+	// console.log(groups);
+
+	let statuses = {};
+	for (let groupId in groups) {
+		const statusesSub = await getStatus4(groups[groupId]);
+		statuses = {...statuses, ...statusesSub};
+	}
+
+	return statuses;
+}
+async function getStatus4(loadedPoints) {
+	let lowest, highest;
+	for (i = 0; i < loadedPoints.length; i += 4) {
+		const id = loadedPoints[i + 2];
+		
+		if (i == 0) {
+			lowest = id;
+			highest = id;
+		} else {
+			if (id < lowest) lowest = id;
+			if (id > highest) highest = id;
+		}
+	}
+
+	// console.log(`lowest = ${lowest}`);
+	// console.log(`highest = ${highest}`);
+
+	const data = await window.contracts.land.contract.methods.getStatus(lowest, highest).call();
+	// console.log(`Statuses = ${data}`);
+
+	const statuses = {};
+	for (let i = 0; i < data.length; i++) {
+		statuses[lowest + i] = data[i];
+	}
+	return statuses;
+}
+
+const REQUEST_POINT_LIMIT = 10000;
+async function getStatus(loadedPoints) {
+	let lowest, highest;
+	for (i = 0; i < loadedPoints.length; i += 4) {
+		const id = loadedPoints[i + 2];
+		
+		if (i == 0) {
+			lowest = id;
+			highest = id;
+		} else {
+			if (id < lowest) lowest = id;
+			if (id > highest) highest = id;
+		}
+	}
+
+	// console.log(`DTL lowest = ${lowest}`);
+	// console.log(`DTL highest = ${highest}`);
+	
+	const loadedPointsTypes = [];
+	
+	const totalPoints = highest - lowest;
+	const lowestOriginal = lowest;
+	const highestOriginal = highest;
+
+	let pointsRemaining = totalPoints;
+
+	while (pointsRemaining > 0) {
+		let laterLowest = lowest;
+		let laterHighest = highest;
+
+		// const pointsToLoad = highestOriginal - lowest + 2;
+		// // console.log(`DTL pointsToLoad = ${pointsToLoad}`);
+
+		if (pointsRemaining > REQUEST_POINT_LIMIT) {
+			highest = lowest + REQUEST_POINT_LIMIT - 1;
+			laterLowest = highest + 1;
+			laterHighest = laterLowest + REQUEST_POINT_LIMIT - 1;
+			if (laterHighest > highestOriginal) laterHighest = highestOriginal;
+		}
+
+		// console.log(`DTL Load = ${lowest}, ${highest}`);
+
+		const data = await window.contracts.land.contract.methods.getStatus(lowest, highest).call();
+		// console.log(`Statuses = ${data}`);
+
+		data.forEach(pointType => loadedPointsTypes.push(pointType));
+		pointsRemaining -= highest - lowest + 1;
+
+		// console.log(`DTL pointsRemaining = ${pointsRemaining}`);
+
+		lowest = laterLowest;
+		highest = laterHighest;
+	}
+
+	return loadedPointsTypes;
+
+	// return {
+	// 	types: loadedPointsTypes,
+	// 	lowest: lowestOriginal
+	// };
+
+	//
+	// if (highest - lowest > REQUEST_POINT_LIMIT) {
+	// 	const data = await window.contracts.land.contract.methods.getStatus(lowest, lowest + REQUEST_POINT_LIMIT).call();
+	// 	// console.log(`Statuses = ${data}`);
+
+	// 	const loadedPointsTypes = [];
+	// 	data.forEach(pointType => loadedPointsTypes.push(pointType));
+	// 	return {
+	// 		types: loadedPointsTypes,
+	// 		lowest
+	// 	};
+	// }
+	//
+
+	// const data = await window.contracts.land.contract.methods.getStatus(lowest, highest).call();
+	// // console.log(`Statuses = ${data}`);
+
+	// const loadedPointsTypes = [];
+	// data.forEach(pointType => loadedPointsTypes.push(pointType));
+	// return {
+	// 	types: loadedPointsTypes,
+	// 	lowest
+	// };
+}
+
+
+function performTrx($scope, to, data, value, method) {
+	if ($scope.account.balance.wei < value) {
+		toast('Insufficient Balance', true);
+		return;
+	}
+
+	const trx = {
+		to,
+		from: $scope.account.address.full,
+		value: window.web3.utils.toHex(value),
+		data
+	};
+
+	let trxRequest;
+	if (window.usingInjected) trxRequest = window.ethereum.request({ method: 'eth_sendTransaction', params: [trx] });
+	else trxRequest = window.connector.sendTransaction(trx);
+
+	$scope.toggleLoader();
+
+	trxRequest
+		.then(trxHash => {
+			setTimeout(() => {
+				checkTrx($scope, trxHash, method);
+			}, TRX_CHECK_DELAY);
+		})
+		.catch(err => {
+			toast(err.message, true);
+			$scope.toggleLoader();
+			$scope.$apply();
+		});
+}
+
+const TRX_CHECK_DELAY = 2000;
+function checkTrx($scope, trxHash, method) {
+	window.web3.eth.getTransactionReceipt(trxHash, (err, res) => {
+		if (err) {
+			$scope.toggleLoader();
+			toast(err, true);
+			return;
+		}
+
+		if (res != null) {
+			$scope.toggleLoader();
+
+			if (res.status) {
+				loadBalance($scope, true);
+				$scope.onTrxResult(method);
+			} else {
+				toast('Transaction Failed', true);
+			}
+		} else {
+			setTimeout(() => {
+				checkTrx($scope, trxHash, method);
+			}, TRX_CHECK_DELAY);
+		}
+	});
+}
+
+const LAND_BASE_PRICES = [
+	'0.1', '0.2', '0.3'
+];
+async function mintLand($scope) {
+	// console.log($scope.sl);
+
+	const extraData = await window.contracts.land.contract.methods['mintLand']($scope.sl.id);
+	const data = extraData.encodeABI();
+
+	performTrx($scope, window.contracts.land.address, data, window.web3.utils.toWei(LAND_BASE_PRICES[getRating($scope.sl.id) - 1]), 'mintLand');
+}
+
+async function mintMultiple($scope, ids) {
+	const extraData = await window.contracts.land.contract.methods['mintMultiple'](ids);
+	const data = extraData.encodeABI();
+	const value = ids.length * LAND_BASE_PRICES[getRating(ids[0]) - 1];
+
+	performTrx($scope, window.contracts.land.address, data, window.web3.utils.toWei(''+value), 'mintMultiple');
+}
+
+const MINER_PRICES = {
+	2: '1.99',
+	3: '2.99',
+	4: '3.99',
+	5: '4.99',
+	6: '5.99',
+	7: '6.99',
+	8: '7.99',
+	9: '8.99',
+	10: '9.99'
+};
+async function installMiner($scope, miner) {
+	// console.log($scope.sl.id);
+	// console.log(miner);
+
+	const extraData = await window.contracts.land.contract.methods['updateStatus']($scope.sl.id, miner);
+	const data = extraData.encodeABI();
+
+	performTrx($scope, window.contracts.land.address, data, window.web3.utils.toWei(MINER_PRICES[miner]), 'installMiner');
+}
+async function updateMultiple($scope, ids, miner) {
+	const extraData = await window.contracts.land.contract.methods['updateMultiple'](ids, miner);
+	const data = extraData.encodeABI();
+	const value = ids.length * MINER_PRICES[miner];
+
+	// console.log(`Sending ${ids} ${miner}`);
+
+	performTrx($scope, window.contracts.land.address, data, window.web3.utils.toWei(''+value), 'updateMultiple');
+}
+
+
+
+
+
+function getLocationNames($scope) {
+	const xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = () => {
+		if (xhttp.readyState == XMLHttpRequest.DONE && xhttp.status == 200) {
+			$scope.landDetails = {...JSON.parse(xhttp.responseText), ...$scope.landDetails};
+			// console.log(xhttp.responseText);
+			$scope.$apply();
+		}
+	}
+	xhttp.open('GET', `https://vmine.xyz/locations/${$scope.account.address.full}`, true);
+	xhttp.send();
+}
+
+
+async function getOffers($scope) {
+	const forDetails = [];
+	
+	const offersMade = await window.contracts.land.contract.methods.getOffers($scope.account.address.full, '0').call();
+	const newArr1 = [];
+	offersMade.forEach(offer => {
+		if (offer[0] == 0) return;
+
+		forDetails.push(offer[5]);
+
+		newArr1.push({
+			id: offer[0],
+			tokenId: offer[5],
+			amt: offer[6],
+			amtFormatted: toEth(offer[6]) + ' MATIC'
+		});
+	});
+	$scope.offersMade = newArr1;
+	// console.log(`offersMade = ${JSON.stringify(newArr1, null, 2)}`);
+
+	const offersRcvd = await window.contracts.land.contract.methods.getOffers($scope.account.address.full, '1').call();
+	const newArr2 = [];
+	offersRcvd.forEach(offer => {
+		if (offer[0] == 0) return;
+
+		newArr2.push({
+			id: offer[0],
+			tokenId: offer[5],
+			amt: offer[6],
+			amtFormatted: toEth(offer[6]) + ' MATIC'
+		});
+	});
+	$scope.offersRcvd = newArr2;
+	// console.log(`offersRcvd = ${JSON.stringify(newArr2, null, 2)}`);
+
+	if (forDetails.length > 0) {
+		postRequest(`https://vmine.xyz/select-locations/`, {ids: forDetails}, (err, res) => {
+			if (!err) {
+				$scope.landDetails = {...JSON.parse(res), ...$scope.landDetails};
+				$scope.$apply();
+
+				// console.log(JSON.stringify($scope.landDetails, null, 4));
+			}
+		});
+	}
+}
+async function makeOffer($scope, tokenId, amt) {
+	const extraData = await window.contracts.land.contract.methods['makeOffer'](tokenId);
+	const data = extraData.encodeABI();
+
+	performTrx($scope, window.contracts.land.address, data, toWei(amt), 'makeOffer');
+}
+async function cancelOffer($scope, offerId) {
+	const extraData = await window.contracts.land.contract.methods['cancelOffer'](offerId);
+	const data = extraData.encodeABI();
+
+	performTrx($scope, window.contracts.land.address, data, '0', 'cancelOffer');
+}
+async function acceptOffer($scope, offerId) {
+	const extraData = await window.contracts.land.contract.methods['acceptOffer'](offerId);
+	const data = extraData.encodeABI();
+
+	performTrx($scope, window.contracts.land.address, data, '0', 'acceptOffer');
+}
+
+async function loadRewardsData($scope, eType) {
+	let token = '';
+	if (eType >= 2 && eType <= 4) token = 'etc';
+	else if (eType >= 5 && eType <= 7) token = 'ltc';
+	else if (eType >= 8 && eType <= 10) token = 'btc';
+
+	const data = await window.contracts[token].contract.methods.rewardData($scope.account.address.full, eType).call();
+	// console.log(`Reward = ${data}`);
+
+	$scope.dbRewards[eType - 2].claimed = toEth(data[0]);
+	$scope.dbRewards[eType - 2].pending = toEth(data[1]);
+	$scope.$apply();
+}
+async function claimReward($scope, eType) {
+	let token = '';
+	if (eType >= 2 && eType <= 4) token = 'etc';
+	else if (eType >= 5 && eType <= 7) token = 'ltc';
+	else if (eType >= 8 && eType <= 10) token = 'btc';
+
+	const extraData = await window.contracts[token].contract.methods['claimReward'](eType);
+	const data = extraData.encodeABI();
+
+	performTrx($scope, window.contracts[token].address, data, 0, 'claimReward');
+}
+
+
+
+function postRequest(url, body, callback) {
+	const xhttp = new XMLHttpRequest();
+	
+	xhttp.open('POST', url);
+	xhttp.setRequestHeader('Content-Type', 'application/json');
+	xhttp.send(JSON.stringify(body));
+	
+	xhttp.onreadystatechange = () => {
+		if (xhttp.readyState == XMLHttpRequest.DONE && xhttp.status == 200) {
+			callback(null, xhttp.responseText);
+		}
+	}
+}
+
+
+function getRequest(url, callback) {
+	const xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = () => {
+		if (xhttp.readyState == XMLHttpRequest.DONE) {
+			if (xhttp.status == 200) callback(null, JSON.parse(xhttp.responseText));
+			else callback(`ERROR ${xhttp.status}`, null);
+		}
+	}
+	xhttp.open('GET', url, true);
+	xhttp.send();
+}
+
+
+const RATING_BREAKPOINTS = [207974, 516027, 1015195];
+function getRatingIndex(id) {
+	if (id <= RATING_BREAKPOINTS[0]) return 0;
+	else if (id <= RATING_BREAKPOINTS[1]) return 1;
+	
+	return 2;
+}
+function getRating(id) {
+	if (id <= RATING_BREAKPOINTS[0]) return 3;
+	else if (id <= RATING_BREAKPOINTS[1]) return 2;
+	
+	return 1;
+}
+
+
+function getSelectNames($scope, ids) {
+	postRequest(`https://vmine.xyz/select-locations/`, {ids}, (err, res) => {
+		if (!err) {
+			$scope.landDetails = {...JSON.parse(res), ...$scope.landDetails};
+			$scope.$apply();
+
+			// console.log('getSelectNames' + JSON.stringify($scope.landDetails, null, 4));
+		}
+	});
+}

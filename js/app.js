@@ -22,7 +22,6 @@ app.controller('myCtrl', ['$scope', '$window', '$timeout', '$interval', '$sce', 
 
 			setLastConnection(window.usingInjected ? 1 : 0);
 			loadBalance($scope, false);
-			console.log(`before getMyLands ${$scope.account}`);
 			await getMyLands($scope);
 			getLocationNames($scope);
 			renderFans();
