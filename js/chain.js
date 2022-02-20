@@ -374,17 +374,9 @@ async function mintLand($scope) {
 async function mintMultiple($scope, ids) {
 	const extraData = await window.contracts.land.contract.methods['mintMultiple'](ids);
 	const data = extraData.encodeABI();
-	// const value = ids.length * LAND_BASE_PRICES[getRating(ids[0]) - 1];
+	const value = ids.length * window.web3.utils.toWei(''+LAND_BASE_PRICES[getRating(ids[0]) - 1]);
 
-	let value = 0;
-	const perLand = Number(LAND_BASE_PRICES[getRating(ids[0]) - 1]);
-	for (let i = 0; i < ids.length; i++) {
-		value += perLand;
-	}
-
-	alert(value);
-
-	performTrx($scope, window.contracts.land.address, data, window.web3.utils.toWei(''+value), 'mintMultiple');
+	performTrx($scope, window.contracts.land.address, data, value, 'mintMultiple');
 }
 
 const MINER_PRICES = {
