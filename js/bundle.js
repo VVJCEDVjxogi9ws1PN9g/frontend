@@ -1701,7 +1701,7 @@ module.exports = {
     }); // window.connector.killSession();
 
     if (!window.connector.connected || window.connector.connected && window.connector.session.accounts.length < 1) window.connector.createSession({
-      chainId: 80001
+      chainId: 137
     });else $scope.handleAccountsChanged(window.connector.session.accounts, false);
     window.connector.on('connect', (err, payload) => {
       if (err) toast('Error connecting to WalletConnect', true);else {

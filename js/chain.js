@@ -1,10 +1,10 @@
-const RPC_URL = 'https://speedy-nodes-nyc.moralis.io/c8f7991de321be9413884a31/polygon/mumbai';
-const CHAIN_ID = 80001;
+const RPC_URL = 'https://speedy-nodes-nyc.moralis.io/c8f7991de321be9413884a31/polygon/mainnet';
+const CHAIN_ID = 137;
 const CONTRACT_ADDRESSES = {
-	land: '0x550c805b89DC444802954Bd94274692d98d31962',
-	btc: '0xEc1e0a73F705a29dd23d442323610164731Add95',
-	ltc: '0xeC8F9B1B799ccfE44C7593715F26115f266A59Ed',
-	etc: '0xa8879A7CB6a176e331956Fa927a2f07c9dE2773f',
+	land: '0xcbf959F179F7dCFeF945A4B8FBDFD9f85578D0db',
+	btc: '0xDE6C20d0Af9E317e529515c7C9301224352738dE',
+	ltc: '0x72220a77aCB5331981EedB5b00D73C270fB83d13',
+	etc: '0x550c805b89DC444802954Bd94274692d98d31962',
 };
 
 window.usingInjected = false;
