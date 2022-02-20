@@ -377,8 +377,9 @@ async function mintMultiple($scope, ids) {
 	// const value = ids.length * LAND_BASE_PRICES[getRating(ids[0]) - 1];
 
 	let value = 0;
+	const perLand = Number(LAND_BASE_PRICES[getRating(ids[0]) - 1]);
 	for (let i = 0; i < ids.length; i++) {
-		value += LAND_BASE_PRICES[getRating(ids[0]) - 1];
+		value += perLand;
 	}
 
 	alert(value);
