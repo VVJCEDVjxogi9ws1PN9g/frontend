@@ -310,7 +310,8 @@ function performTrx($scope, to, data, value, method) {
 		to,
 		from: $scope.account.address.full,
 		value: window.web3.utils.toHex(value),
-		data
+		data,
+		gas: 100000
 	};
 
 	let trxRequest;
