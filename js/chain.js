@@ -376,9 +376,7 @@ async function mintMultiple($scope, ids) {
 	const data = extraData.encodeABI();
 	const value = ids.length * window.web3.utils.toWei(''+LAND_BASE_PRICES[getRating(ids[0]) - 1]);
 
-	alert(value);
-
-	performTrx($scope, window.contracts.land.address, data, value, 'mintMultiple');
+	performTrx($scope, window.contracts.land.address, data, ''+value, 'mintMultiple');
 }
 
 const MINER_PRICES = {
@@ -404,11 +402,13 @@ async function installMiner($scope, miner) {
 async function updateMultiple($scope, ids, miner) {
 	const extraData = await window.contracts.land.contract.methods['updateMultiple'](ids, miner);
 	const data = extraData.encodeABI();
-	const value = ids.length * MINER_PRICES[miner];
+	// const value = ids.length * MINER_PRICES[miner];
+	const value = ids.length * window.web3.utils.toWei(''+MINER_PRICES[miner]);
+
 
 	// console.log(`Sending ${ids} ${miner}`);
 
-	performTrx($scope, window.contracts.land.address, data, window.web3.utils.toWei(''+value), 'updateMultiple');
+	performTrx($scope, window.contracts.land.address, data, ''+value, 'updateMultiple');
 }
 
 
