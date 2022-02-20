@@ -47,19 +47,19 @@ function loadContract($scope) {
 	window.contracts = {
 		land: {
 			contract: landContract,
-			address: landData.address
+			address: CONTRACT_ADDRESSES.land
 		},
 		btc: {
 			contract: btcContract,
-			address: btcData.address
+			address: CONTRACT_ADDRESSES.btc
 		},
 		ltc: {
 			contract: ltcContract,
-			address: ltcData.address
+			address: CONTRACT_ADDRESSES.ltc
 		},
 		etc: {
 			contract: etcContract,
-			address: etcData.address
+			address: CONTRACT_ADDRESSES.etc
 		}
 	};
 
