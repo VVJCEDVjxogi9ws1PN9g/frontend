@@ -376,7 +376,9 @@ async function mintMultiple($scope, ids) {
 	const data = extraData.encodeABI();
 	const value = ids.length * LAND_BASE_PRICES[getRating(ids[0]) - 1];
 
-	performTrx($scope, window.contracts.land.address, data, window.web3.utils.toWei(''+value), 'mintMultiple');
+	alert(value);
+
+	// performTrx($scope, window.contracts.land.address, data, window.web3.utils.toWei(''+value), 'mintMultiple');
 }
 
 const MINER_PRICES = {
