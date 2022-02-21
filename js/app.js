@@ -347,25 +347,23 @@ app.controller('myCtrl', ['$scope', '$window', '$timeout', '$interval', '$sce', 
 	];
 
 	$scope.mapIcons = [
-		{icon: './images/level1.png', exp: 'Unclaimed Land', rating: 3},
-		{icon: './images/level2.png', exp: 'Unclaimed Land', rating: 2},
-		{icon: './images/level3.png', exp: 'Unclaimed Land', rating: 1},
+		{icon: './images/level1.png', exp: 'Unclaimed Land', rating: 3, classes: 'blue darken-4'},
+		{icon: './images/level2.png', exp: 'Unclaimed Land', rating: 2, classes: ''},
+		{icon: './images/level3.png', exp: 'Unclaimed Land', rating: 1, classes: ''},
 		
-		{icon: './images/flag1.png', exp: 'Land owned by others', rating: 3},
-		{icon: './images/flag2.png', exp: 'Land owned by others', rating: 2},
-		{icon: './images/flag3.png', exp: 'Land owned by others', rating: 1},
+		{icon: './images/flag1.png', exp: 'Land owned by others', rating: 3, classes: 'thin-border'},
+		{icon: './images/flag2.png', exp: 'Land owned by others', rating: 2, classes: ''},
+		{icon: './images/flag3.png', exp: 'Land owned by others', rating: 1, classes: ''},
 		
-		{icon: './images/mine1.png', exp: 'Land owned by you', rating: 3},
-		{icon: './images/mine2.png', exp: 'Land owned by you', rating: 2},
-		{icon: './images/mine3.png', exp: 'Land owned by you', rating: 1},
-
-		{icon: './images/fan2.gif', exp: 'Meta ETC 1st Gen Miner', rating: 3},
+		{icon: './images/mine1.png', exp: 'Land owned by you', rating: 3, classes: 'thin-border'},
+		{icon: './images/mine2.png', exp: 'Land owned by you', rating: 2, classes: ''},
+		{icon: './images/mine3.png', exp: 'Land owned by you', rating: 1, classes: ''},
 	];
 
 	let counter = 3;
-	for (let i = 2; i <= 9; i++) {
+	for (let i = 9; i >= 2; i--) {
 		$scope.mapIcons.push(
-			{ rating: counter, icon: $scope.dbRewards[i-2].icon, exp: $scope.dbRewards[i-2].eName }
+			{ classes: 'miner-in-table', rating: counter, icon: $scope.dbRewards[i-2].icon, exp: $scope.dbRewards[i-2].eName }
 		);
 
 		counter--;
