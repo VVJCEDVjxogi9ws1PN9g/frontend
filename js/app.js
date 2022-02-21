@@ -350,7 +350,27 @@ app.controller('myCtrl', ['$scope', '$window', '$timeout', '$interval', '$sce', 
 		{icon: './images/level1.png', exp: 'Unclaimed Land', rating: 3},
 		{icon: './images/level2.png', exp: 'Unclaimed Land', rating: 2},
 		{icon: './images/level3.png', exp: 'Unclaimed Land', rating: 1},
+		
+		{icon: './images/flag1.png', exp: 'Land owned by others', rating: 3},
+		{icon: './images/flag2.png', exp: 'Land owned by others', rating: 2},
+		{icon: './images/flag3.png', exp: 'Land owned by others', rating: 1},
+		
+		{icon: './images/mine1.png', exp: 'Land owned by you', rating: 3},
+		{icon: './images/mine2.png', exp: 'Land owned by you', rating: 2},
+		{icon: './images/mine3.png', exp: 'Land owned by you', rating: 1},
+
+		{icon: './images/fan2.gif', exp: 'Meta ETC 1st Gen Miner', rating: 3},
 	];
+
+	let counter = 3;
+	for (let i = 2; i <= 9; i++) {
+		$scope.mapIcons.push(
+			{ rating: counter, icon: $scope.dbRewards[i-2].icon, exp: $scope.dbRewards[i-2].eName }
+		);
+
+		counter--;
+		if (counter == 0) counter = 3;
+	}
 
 	$scope.tokens = [
 		{name: 'Meta BTC', supply: '21,000,000', daily: '0.0025 - 0.01'},
