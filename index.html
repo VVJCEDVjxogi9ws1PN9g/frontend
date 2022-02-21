@@ -252,8 +252,35 @@
 
 			<section>&nbsp;</section>
 			<div>
+				<h4>Map Cheatsheet</h4>
+				<p class="light">This cheatsheet explains all the icons you see on the map</p>
+
+				<table class="white centered striped z-depth-1">
+					<thead>
+						<tr>
+							<th>Icon</th>
+							<th>Rep</th>
+							<th>Rating</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="i in mapIcons">
+							<td><img height="30px" ng-src="{{i.icon}}" /></td>
+							<td>{{i.exp}}</td>
+							<td>
+								<i class="material-icons" ng-class="i.rating == 3 ? 'orange-text text-lighten-2' : 'grey-text'">star</i>
+								<i class="material-icons" ng-class="i.rating >= 2 ? 'orange-text text-lighten-2' : 'grey-text'">star</i>
+								<i class="material-icons orange-text text-lighten-2">star</i>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<section>&nbsp;</section>
+			<div>
 				<h4>Tokens Cheatsheet</h4>
-				<p class="light">These are the tree tokens for which you can install miners.</p>
+				<p class="light">Miners reap rewards in form of three tokens - Meta BTC, Meta LTC & Meta ETC. These tokens have the same supply amount as Bitcoin, Litecoin & Ethereum Classic respectively.</p>
 
 				<table class="white centered striped z-depth-1">
 					<thead>
@@ -347,7 +374,7 @@
 			<div>
 				<div class="input-field">
 					<input id="makeOfferPrice" ng-model="sl.makeOfferPrice" type="number" step="0.1" />
-          <label for="makeOfferPrice">Offer Price</label>
+          <label for="makeOfferPrice">Offer Price (in MATIC)</label>
 				</div>
 			</div>
 		</div>
@@ -533,15 +560,15 @@
 				</div>
 				<div>
 					<div>Daily mBTC Reward</div>
-					<div>Upto {{dbRewards[5 + sl.rating].daily}}</div>
+					<div>Upto {{dbRewards[5 + sl.rating].daily}} mBTC</div>
 				</div>
 				<div>
 					<div>Daily mLTC Reward</div>
-					<div>Upto {{dbRewards[2 + sl.rating].daily}}</div>
+					<div>Upto {{dbRewards[2 + sl.rating].daily}} mLTC</div>
 				</div>
 				<div>
 					<div>Daily mETC Reward</div>
-					<div>Upto {{dbRewards[-1 + sl.rating].daily}}</div>
+					<div>Upto {{dbRewards[-1 + sl.rating].daily}} mETC</div>
 				</div>
 				<div ng-show="sl.status == 0">
 					<div>Price</div>
