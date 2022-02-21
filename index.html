@@ -20,6 +20,7 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@8.3.1/dist/css/shepherd.css"/>
 	<link rel="stylesheet" href="./css/leaflet-search.src.css">
 	<link rel="stylesheet" href="./css/styles2.css">
 	<link rel="stylesheet" href="./css/L.Grid.css">
@@ -354,10 +355,10 @@
 	
 	<footer>
 		<ul class="tabs tabs-fixed-width" ng-class="currentTab == 'map' ? 'white' : 'blue darken-4'">
-			<li class="tab" ng-class="account == null ? 'disabled' : ''"><a ng-click="currentTab = 'dashboard'" href="#dashboard" class="nactive"><i class="material-icons">dashboard</i><span>Dashboard</span></a></li>
+			<li class="tab db-tab" ng-class="account == null ? 'disabled' : ''"><a ng-click="currentTab = 'dashboard'" href="#dashboard" class="nactive"><i class="material-icons">dashboard</i><span>Dashboard</span></a></li>
 			<li class="tab"><a ng-click="currentTab = 'map'" href="#map" class="active"><i class="material-icons">map</i><span>Map</span></a></li>
 			<li class="tab"><a ng-click="currentTab = 'featured'" href="#featured" class="nactive"><i class="material-icons">stars</i><span>Featured</span></a></li>
-			<li class="tab"><a ng-click="currentTab = 'guide'" href="#guide" class="nactive"><i class="material-icons">info</i><span>Guide</span></a></li>
+			<li class="tab guide-tab"><a ng-click="currentTab = 'guide'" href="#guide" class="nactive"><i class="material-icons">info</i><span>Guide</span></a></li>
 		</ul>
 	</footer>
 
@@ -592,6 +593,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/shepherd.js@8.3.1/dist/js/shepherd.min.js"></script>
 	<script src="./js/leaflet-search.src.js"></script>
 	<script src="./js/bundle.js"></script>
 	<script src="./js/view.js"></script>
