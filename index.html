@@ -265,7 +265,7 @@
 					</thead>
 					<tbody>
 						<tr ng-repeat="i in mapIcons">
-							<td><img class="blue darken-4" height="30" ng-src="{{i.icon}}" /></td>
+							<td><img class="{{i.classes}}" height="30" ng-src="{{i.icon}}" /></td>
 							<td>{{i.exp}}</td>
 							<td>
 								<i class="material-icons" ng-class="i.rating == 3 ? 'orange-text text-lighten-2' : 'grey-text'">star</i>
