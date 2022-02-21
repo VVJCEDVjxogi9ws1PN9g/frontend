@@ -265,7 +265,7 @@
 					</thead>
 					<tbody>
 						<tr ng-repeat="i in mapIcons">
-							<td><img height="30" ng-src="{{i.icon}}" /></td>
+							<td><img class="blue darken-4" height="30" ng-src="{{i.icon}}" /></td>
 							<td>{{i.exp}}</td>
 							<td>
 								<i class="material-icons" ng-class="i.rating == 3 ? 'orange-text text-lighten-2' : 'grey-text'">star</i>
@@ -293,7 +293,7 @@
 					<tbody>
 						<tr ng-repeat="t in tokens">
 							<td>{{t.name}}</td>
-							<td><span class="badge green">{{t.supply}}</span></td>
+							<td><span class="badge green white-text">{{t.supply}}</span></td>
 							<!-- <td>{{t.daily}} {{t.name}}</td> -->
 						</tr>
 					</tbody>
