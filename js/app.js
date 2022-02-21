@@ -347,13 +347,15 @@ app.controller('myCtrl', ['$scope', '$window', '$timeout', '$interval', '$sce', 
 	];
 
 	$scope.mapIcons = [
-		{title: 'White Square', exp: 'Unclaimed Land', rating: 3}
+		{icon: './images/level1.png', exp: 'Unclaimed Land', rating: 3},
+		{icon: './images/level2.png', exp: 'Unclaimed Land', rating: 2},
+		{icon: './images/level3.png', exp: 'Unclaimed Land', rating: 1},
 	];
 
 	$scope.tokens = [
-		{name: 'mBTC', supply: '21,000,000', daily: '0.0025 - 0.01'},
-		{name: 'mLTC', supply: '84,000,000', daily: '0.25 - 1'},
-		{name: 'mETC', supply: '210,700,000', daily: '1.25 - 5'}
+		{name: 'Meta BTC', supply: '21,000,000', daily: '0.0025 - 0.01'},
+		{name: 'Meta LTC', supply: '84,000,000', daily: '0.25 - 1'},
+		{name: 'Meta ETC', supply: '210,700,000', daily: '1.25 - 5'}
 	];
 
 	$scope.installMiner2 = function() {
