@@ -396,7 +396,7 @@ function renderFans() {
 	removeFans();
 	
 	for (let i = 0; i < loadedPoints.length; i += 4) {
-		if (!inBounds({lat: loadedPoints[i], lng: loadedPoints[i + 1]})) return;
+		if (!inScreenBounds({lat: loadedPoints[i], lng: loadedPoints[i + 1]})) return;
 
 		const id = loadedPoints[i + 2];
 		const landRating = getRating(id);
@@ -517,6 +517,23 @@ function isObjEqual(x, y) {
 
 
 function inBounds(point) {
+	var eastBound = point.lng < rectBounds._northEast.lng;
+	var westBound = point.lng > rectBounds._southWest.lng;
+	var inLong;
+
+	if (rectBounds._northEast.lng < rectBounds._southWest.lng) {
+		inLong = eastBound || westBound;
+	} else {
+		inLong = eastBound && westBound;
+	}
+
+	var inLat = point.lat > rectBounds._southWest.lat && point.lat < rectBounds._northEast.lat;
+	return inLat && inLong;
+}
+
+function inScreenBounds(point) {
+	const rectBounds = map.getBounds();
+
 	var eastBound = point.lng < rectBounds._northEast.lng;
 	var westBound = point.lng > rectBounds._southWest.lng;
 	var inLong;
