@@ -1,4 +1,4 @@
-const MIN_ZOOM_FOR_POINTS = 12;
+const MIN_ZOOM_FOR_POINTS = 10;
 
 let fanMarkers = [];
 const SERVER_URL = 'https://vmine.xyz/';
@@ -364,15 +364,52 @@ function setStatuses(data) {
 	loadedPointsTypes = data;
 }
 
+const MARKER_TYPES = {
+	UNCLAIMED: 'Unclaimed Land',
+	OWNED: 'Your Land',
+	CLAIMED: 'Claimed Land',
+	MINING: 'Miner Running'
+};
+const MARKER_STARS = {
+	1: '<i class="material-icons orange-text text-lighten-2">star</i><i class="material-icons grey-text">star</i><i class="material-icons grey-text">star</i>',
+	2: '<i class="material-icons grey-text">star</i><i class="material-icons orange-text text-lighten-2">star</i><i class="material-icons orange-text text-lighten-2">star</i>',
+	3: '<i class="material-icons orange-text text-lighten-2">star</i><i class="material-icons orange-text text-lighten-2">star</i><i class="material-icons orange-text text-lighten-2">star</i>',
+};
+function getPopupData(type, rating) {
+	return `${type}<br/>${MARKER_STARS[rating]}`;
+}
+
 function renderFans() {
 	removeFans();
-
+	
 	for (let i = 0; i < loadedPoints.length; i += 4) {
 		const id = loadedPoints[i + 2];
+		const landRating = getRating(id);
+
+		let markerType = MARKER_TYPES.UNCLAIMED;
 
 		let icon = map.getZoom() >= 9 ? squareIcons.big[getRatingIndex(id)] : squareIcons.small[getRatingIndex(id)];
-		if (loadedPointsTypes[id] == 1) icon =  _scope.account && _scope.account.lands && _scope.account.lands.indexOf(''+id) >= 0 ? mineIcons.big[getRatingIndex(id)] : flagIcons.big[getRatingIndex(id)];
-		else if (loadedPointsTypes[id] > 1) icon = fanIcons[loadedPointsTypes[id]];
+		if (loadedPointsTypes[id] == 1) {
+			// owned by user
+			if (_scope.account && _scope.account.lands && _scope.account.lands.indexOf(''+id) >= 0) {
+				icon = mineIcons.big[getRatingIndex(id)];
+				markerType = MARKER_TYPES.OWNED;
+			}
+
+			// owned by someone else
+			else {
+				icon = flagIcons.big[getRatingIndex(id)];
+				markerType = MARKER_TYPES.CLAIMED;
+			}
+
+			// icon =  _scope.account && _scope.account.lands && _scope.account.lands.indexOf(''+id) >= 0 ? mineIcons.big[getRatingIndex(id)] : flagIcons.big[getRatingIndex(id)];
+		}
+
+		// miner installed
+		else if (loadedPointsTypes[id] > 1) {
+			icon = fanIcons[loadedPointsTypes[id]];
+			markerType = MARKER_TYPES.MINING;
+		}
 
 		const newMarker = L.marker([loadedPoints[i], loadedPoints[i+1]], { icon }).addTo(map).on('click', () => {
 			if (_scope.pointsLoading) return;
@@ -384,6 +421,17 @@ function renderFans() {
 			_scope.openLocationModal(id, _scope.account && _scope.account.lands && _scope.account.lands.indexOf(''+id) >= 0, loadedPointsTypes[id]);
 			getSimpleAddress(loadedPoints[i], loadedPoints[i+1]);
 		});
+
+		// marker popup
+		var newpopup3 = L.popup({
+			autoPan: false,
+			closeButton: false,
+			closeOnClick: false,
+			autoClose: false,
+			closeOnEscapeKey: false
+		}).setContent(getPopupData(markerType, landRating));
+		newMarker.bindPopup(newpopup3).openPopup();
+		// marker popup
 
 		if (loadedPointsTypes[id] > 1) {
 			newMarker._icon.classList.add('fan');
