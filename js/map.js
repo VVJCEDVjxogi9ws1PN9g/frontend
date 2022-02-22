@@ -396,7 +396,7 @@ function renderFans() {
 	removeFans();
 	
 	for (let i = 0; i < loadedPoints.length; i += 4) {
-		if (!inScreenBounds({lat: loadedPoints[i], lng: loadedPoints[i + 1]})) return;
+		if (!inScreenBounds({lat: loadedPoints[i], lng: loadedPoints[i + 1]})) continue;
 
 		const id = loadedPoints[i + 2];
 		const landRating = getRating(id);
