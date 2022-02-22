@@ -379,10 +379,25 @@ function getPopupData(type, rating) {
 	return `${type}<br/>${MARKER_STARS[rating]}`;
 }
 
+let popupRecord = {
+	'Unclaimed Land': [],
+	'Your Land': [],
+	'Claimed Land': [],
+	'Miner Running': []
+};
 function renderFans() {
+	popupRecord = {
+		'Unclaimed Land': [],
+		'Your Land': [],
+		'Claimed Land': [],
+		'Miner Running': []
+	};
+
 	removeFans();
 	
 	for (let i = 0; i < loadedPoints.length; i += 4) {
+		if (!inBounds({lat: loadedPoints[i], lng: loadedPoints[i + 1]})) return;
+
 		const id = loadedPoints[i + 2];
 		const landRating = getRating(id);
 
@@ -423,14 +438,18 @@ function renderFans() {
 		});
 
 		// marker popup
-		var newpopup3 = L.popup({
-			autoPan: false,
-			closeButton: false,
-			closeOnClick: false,
-			autoClose: false,
-			closeOnEscapeKey: false
-		}).setContent(getPopupData(markerType, landRating));
-		newMarker.bindPopup(newpopup3).openPopup();
+		if (popupRecord[markerType].indexOf(landRating) < 0) {
+			var newpopup3 = L.popup({
+				autoPan: false,
+				closeButton: false,
+				closeOnClick: false,
+				autoClose: false,
+				closeOnEscapeKey: false
+			}).setContent(getPopupData(markerType, landRating));
+			newMarker.bindPopup(newpopup3).openPopup();
+
+			popupRecord[markerType].push(landRating);
+		}
 		// marker popup
 
 		if (loadedPointsTypes[id] > 1) {
