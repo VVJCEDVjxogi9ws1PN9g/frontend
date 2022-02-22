@@ -1,4 +1,4 @@
-const MIN_ZOOM_FOR_POINTS = 10;
+const MIN_ZOOM_FOR_POINTS = 12;
 
 let fanMarkers = [];
 const SERVER_URL = 'https://vmine.xyz/';
