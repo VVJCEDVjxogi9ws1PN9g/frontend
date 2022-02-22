@@ -423,7 +423,7 @@ function renderFans() {
 		});
 
 		// marker popup
-		// newMarker.bindPopup(getPopupData(markerType, landRating)).openPopup();
+		newMarker.bindPopup('getPopupData(markerType, landRating)', 3).openPopup();
 		// marker popup
 
 		if (loadedPointsTypes[id] > 1) {
