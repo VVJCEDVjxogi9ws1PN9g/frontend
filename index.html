@@ -224,7 +224,8 @@
 						<tr ng-repeat="reward in dbRewards">
 							<td><img class="miner-in-table" height="30" src="{{reward.icon}}" /></td>
 							<td>{{reward.claimed}}</td>
-							<td><button ng-class="reward.pending == 0 ? 'disabled' : ''" class="btn blue darken-3 btn-small tooltipped" data-position="top" data-tooltip="Claim Reward" ng-click="claimReward(reward.eType)"><i class="material-icons">account_balance_wallet</i> {{reward.pending}} {{reward.currency}}</button></td>
+							<td ng-show="!reward.wating"><button ng-class="reward.pending == 0 ? 'disabled' : ''" class="btn blue darken-3 btn-small tooltipped" data-position="top" data-tooltip="Claim Reward" ng-click="claimReward(reward.eType)"><i class="material-icons">account_balance_wallet</i> {{reward.pending}} {{reward.currency}}</button></td>
+							<td ng-show="reward.wating">{{reward.waitFor}}</td>
 						</tr>
 					</tbody>
 				</table>
@@ -362,6 +363,45 @@
 		</ul>
 	</footer>
 
+	<div id="checkoutModal" class="modal bottom-sheet">
+		<div ng-show="loading" class="progress blue darken-4">
+      <div class="indeterminate blue darken-1"></div>
+  	</div>
+
+		<div class="modal-content">
+			<h5>Checkout</h5>
+
+			<div class="kv">
+				<div>
+					<div>Original Price</div>
+					<div>{{checkout.original}} MATIC</div>
+				</div>
+				<div>
+					<div>Coupon Discount</div>
+					<div class="green-text">{{checkout.couponDiscount}} MATIC</div>
+				</div>
+				<div>
+					<div>Final Price</div>
+					<div>{{checkout.final}} MATIC</div>
+				</div>
+			</div>
+
+			<div class="section"></div>
+			
+			<div>
+				<div class="input-field">
+					<input type="text" id="couponCode" ng-model="checkout.couponCode" ng-change="onCouponChanged()" />
+          <label for="couponCode">Apply Coupon</label>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal-footer">
+			<a href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="modal-close btn-flat">Cancel</a>
+			<a ng-click="performCheckout()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Confirm</a>
+		</div>
+	</div>
+
 	<div id="makeOfferModal" class="modal bottom-sheet">
 		<div ng-show="loading" class="progress blue darken-4">
       <div class="indeterminate blue darken-1"></div>
@@ -420,7 +460,7 @@
 
 		<div class="modal-footer">
 			<a href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="modal-close btn-flat">Cancel</a>
-			<a ng-click="installMiner2()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Install</a>
+			<a ng-click="initCheckout('installMiner2')" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Install</a>
 		</div>
 	</div>
 
@@ -458,7 +498,7 @@
 
 		<div class="modal-footer">
 			<a href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="modal-close btn-flat">Cancel</a>
-			<a ng-click="installMulMiner2()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Install</a>
+			<a ng-click="initCheckout('installMulMiner2')" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Install</a>
 		</div>
 	</div>
 
@@ -529,7 +569,7 @@
 
 		<div class="modal-footer">
 			<a href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="modal-close btn-flat">Cancel</a>
-			<a ng-show="sl.multiMode == 0" ng-click="mintMulLand()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Buy Land</a>
+			<a ng-show="sl.multiMode == 0" ng-click="initCheckout('mintMulLand')" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Buy Land</a>
 			<a ng-show="sl.multiMode == 1" ng-click="installMulMiner()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Install Miner</a>
 		</div>
 	</div>
@@ -580,13 +620,43 @@
 
 		<div class="modal-footer">
 			<a href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="modal-close btn-flat">Cancel</a>
-			<a ng-show="!sl.myLand && sl.status == 0" ng-click="mintLand()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Buy Land</a>
+			<a ng-show="!sl.myLand && sl.status == 0" ng-click="initCheckout('mintLand')" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Buy Land</a>
 			<a ng-show="!sl.myLand && sl.status != 0" ng-click="makeOffer()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">Make Offer</a>
 			<a ng-show="sl.myLand" ng-click="installMiner()" href="javascript:void(0)" ng-class="loading ? 'disabled' : ''" class="btn black">{{sl.status > 1 ? 'Update Miner' : 'Install Miner'}}</a>
 		</div>
 	</div>
-	
 
+	<div id="ukraineModal" class="modal bottom-sheet">
+		<div class="modal-content">
+			<h5>Stand with Ukraine 💙💛</h5>
+			<p>For all sales made on Vmine metaverse we're donating 25% to Ukraine.</p>
+		</div>
+
+		<div class="modal-footer">
+			<a href="javascript:void(0)" class="modal-close btn-flat">Close</a>
+		</div>
+	</div>
+
+	<div id="referralModal" class="modal bottom-sheet">
+		<div class="modal-content">
+			<h5>Earn 25% Commission</h5>
+			<p>Share the app link <a href="https://vmine.app" target="_blank">https://vmine.app</a> with your friends.</p>
+			<img class="ref-image" src="./images/ref.png" alt="Refer Friends" />
+			<p>Tell them to use your wallet address as Coupon Code.</p>
+			<p>Your friend gets 25% discount on his purchase.</p>
+			<p>You get 25% commission on the order.</p>
+		</div>
+
+		<div class="modal-footer">
+			<a href="javascript:void(0)" class="modal-close btn-flat">Close</a>
+		</div>
+	</div>
+
+	<div class="fixed-bottom">
+		<a class="waves-effect waves-light blue lighten-2 btn btn-floating modal-trigger" href="#ukraineModal"><i class="yellow-text material-icons">favorite</i></a>
+		&nbsp;
+		<a class="waves-effect waves-light red btn btn-floating modal-trigger" href="#referralModal"><i class="material-icons">person_add</i></a>
+	</div>
 	
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.0-rc.0/web3.min.js" integrity="sha512-/PTXSvaFzmO4So7Ghyq+DEZOz0sNLU4v1DP4gMOfY3kFu9L/IKoqSHZ6lNl3ZoZ7wT20io3vu/U4IchGcGIhfw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
