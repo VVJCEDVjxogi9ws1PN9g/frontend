@@ -641,6 +641,7 @@
 		<div class="modal-content">
 			<h5>Earn 25% Commission</h5>
 			<p>Share the app link <a href="https://vmine.app" target="_blank">https://vmine.app</a> with your friends.</p>
+			<p ng-show="account != null"><a href="javscript:void(0)" onclick="copyInviteText()">Copy Invite Text</a></p>
 			<img class="ref-image" src="./images/ref.png" alt="Refer Friends" />
 			<p>Tell them to use your wallet address as Coupon Code.</p>
 			<p>Your friend gets 25% discount on his purchase.</p>
@@ -650,6 +651,8 @@
 		<div class="modal-footer">
 			<a href="javascript:void(0)" class="modal-close btn-flat">Close</a>
 		</div>
+
+		<textarea id="shareText" style="display: none;">Hello guys check out the VMINE Metaverse and buy virtual LAND for just ₹10 or $0.15&#13;&#10;&#13;&#10;Join the Metaverse and earn crypto rewards daily. Buy before all LAND units are sold out!&#13;&#10;&#13;&#10;Use my code {{account.address.full}} to get 25% discount.&#13;&#10;&#13;&#10;https://vmine.org</textarea>
 	</div>
 
 	<div class="fixed-bottom">
